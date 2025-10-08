@@ -1,0 +1,19 @@
+.maze-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.maze-row {
+    display: flex;
+    gap: 2px;
+}
+
+.maze-cell {
+    width: 30px;
+    height: 30px;
+    background-color: #555;
+    border-radius: 4px;
+}
