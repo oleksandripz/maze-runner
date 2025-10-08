@@ -1,0 +1,128 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #1a1a1a, #252525);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.layout {
+    width: 100%;
+    max-width: 900px;
+    background-color: #2b2b2b;
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    padding: 2rem;
+    text-align: center;
+}
+
+.header {
+    background-color: transparent;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #bbb;
+    margin-bottom: 1rem;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 60vh;
+}
+
+.btn {
+    margin-top: 10px;
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn:hover {
+        background: #45a049;
+        transform: scale(1.05);
+    }
+
+.maze-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.maze-row {
+    display: flex;
+    gap: 4px;
+}
+
+.maze-cell {
+    width: 28px;
+    height: 28px;
+    background-color: #555;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+    .maze-cell:hover {
+        background-color: #666;
+    }
+
+    .maze-cell.wall {
+        background-color: #222;
+        border: 1px solid #000;
+    }
+
+    .maze-cell.path {
+        background-color: #aaa;
+        border: 1px solid #888;
+    }
+
+    .maze-grid {
+    display: inline-block;
+    margin-top: 20px;
+    border: 3px solid #444;
+    background-color: #111;
+    padding: 5px;
+    }
+
+    .maze-row {
+    display: flex;
+    }
+
+    .maze-cell {
+    width: 25px;
+    height: 25px;
+    margin: 1px;
+    transition: background-color 0.2s ease;
+    border-radius: 3px;
+    }
+
+    .maze-cell.wall {
+        background-color: ##000000;
+    }
+
+    .maze-cell.path {
+        background-color: #fff;
+    }
+
+    .maze-cell.start {
+        background-color: #4caf50;
+    }
+
+    .maze-cell.exit {
+        background-color: #e53935;
+    }
