@@ -1,14 +1,50 @@
-﻿import React, { useEffect } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import Layout from "../components/layout";
 import { useMaze } from "../hooks/useMaze";
 import "../styles/main.css";
+import { useSettings } from '../context/SettingsContext';
+import EndDialog from '../components/EndDialog';
 
 interface GamePageProps {
     onEnd: (moves: number, time: number) => void;
 }
 
-const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
-    const maze = [
+const MAZES = {
+    easy: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1],
+        [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+        [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+        [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ],
+    normal: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+        [1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+        [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ],
+    hard: [
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
         [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
@@ -40,22 +76,33 @@ const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
         [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    ];
+    ]
+};
 
+const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
+    const { settings } = useSettings();
+
+    const maze = useMemo(() => {
+        return MAZES[settings.difficulty];
+    }, [settings.difficulty]);
+
+    const size = maze.length;
     const start = { row: 1, col: 1 };
-    const exit = { row: 29, col: 29 };
+    const exit = { row: size - 2, col: size - 2 };
 
     const { playerPosition, isGameWon, moves, time, resetGame } = useMaze(
         maze,
         start,
-        exit
+        exit,
+        { cooldownMs: 150 }
     );
+
+    const [showEndDialog, setShowEndDialog] = useState(false);
 
     useEffect(() => {
         if (isGameWon) {
-            setTimeout(() => {
-                onEnd(moves, time);
-            }, 1000);
+            setShowEndDialog(true);
+            onEnd(moves, time);
         }
     }, [isGameWon, moves, time, onEnd]);
 
@@ -68,11 +115,10 @@ const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
     return (
         <Layout>
             <div className="page">
-                <h2>Великий Лабіринт</h2>
+                <h2>Лабіринт ({settings.difficulty})</h2>
                 <div className="game-info">
                     <p>Час: {formatTime(time)}</p>
                     <p>Кроків: {moves}</p>
-                    <p>Керування: WASD або стрілки</p>
                 </div>
 
                 <div className="maze-grid">
@@ -80,42 +126,24 @@ const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
                         <div key={rowIndex} className="maze-row">
                             {row.map((cell, colIndex) => {
                                 let cellClass = cell === 1 ? "wall" : "path";
-
-                                if (rowIndex === start.row && colIndex === start.col) {
-                                    cellClass = "start";
-                                }
-                                if (rowIndex === exit.row && colIndex === exit.col) {
-                                    cellClass = "exit";
-                                }
-                                if (rowIndex === playerPosition.row && colIndex === playerPosition.col) {
-                                    cellClass = "player";
-                                }
-
-                                return (
-                                    <div
-                                        key={colIndex}
-                                        className={`maze-cell ${cellClass}`}
-                                    ></div>
-                                );
+                                if (rowIndex === start.row && colIndex === start.col) cellClass = "start";
+                                if (rowIndex === exit.row && colIndex === exit.col) cellClass = "exit";
+                                if (rowIndex === playerPosition.row && colIndex === playerPosition.col) cellClass = "player";
+                                return <div key={colIndex} className={`maze-cell ${cellClass}`}></div>;
                             })}
                         </div>
                     ))}
                 </div>
 
-                {isGameWon && (
-                    <div className="victory-message">
-                        <h3>Вітаємо! Ви пройшли лабіринт!</h3>
-                    </div>
+                {showEndDialog && (
+                    <EndDialog
+                        moves={moves}
+                        time={time}
+                        onNextLevel={() => window.location.reload()}
+                        onRestart={resetGame}
+                        onClose={() => setShowEndDialog(false)}
+                    />
                 )}
-
-                <div className="game-buttons">
-                    <button className="btn btn-secondary" onClick={resetGame}>
-                        Перезапустити
-                    </button>
-                    <button className="btn" onClick={() => onEnd(moves, time)}>
-                        Завершити гру
-                    </button>
-                </div>
             </div>
         </Layout>
     );
