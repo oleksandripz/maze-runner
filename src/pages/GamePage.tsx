@@ -1,13 +1,10 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/layout";
 import { useMaze } from "../hooks/useMaze";
 import "../styles/main.css";
 import { useSettings } from '../context/SettingsContext';
 import EndDialog from '../components/EndDialog';
-
-interface GamePageProps {
-    onEnd: (moves: number, time: number) => void;
-}
 
 const MAZES = {
     easy: [
@@ -79,7 +76,9 @@ const MAZES = {
     ]
 };
 
-const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
+const GamePage: React.FC = () => {
+    const { userId } = useParams<{ userId: string }>();
+    const navigate = useNavigate();
     const { settings } = useSettings();
 
     const maze = useMemo(() => {
@@ -102,9 +101,8 @@ const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
     useEffect(() => {
         if (isGameWon) {
             setShowEndDialog(true);
-            onEnd(moves, time);
         }
-    }, [isGameWon, moves, time, onEnd]);
+    }, [isGameWon]);
 
     const formatTime = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
@@ -112,10 +110,21 @@ const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const handleResults = () => {
+        navigate(`/results/${userId}`, {
+            state: { moves, time }
+        });
+    };
+
+    const handleRestart = () => {
+        resetGame();
+        setShowEndDialog(false); // Додано: закриваємо діалог
+    };
+
     return (
         <Layout>
             <div className="page">
-                <h2>Лабіринт ({settings.difficulty})</h2>
+                <h2 style={{ textTransform: 'capitalize' }}>Гравець: {userId}</h2>
                 <div className="game-info">
                     <p>Час: {formatTime(time)}</p>
                     <p>Кроків: {moves}</p>
@@ -139,9 +148,12 @@ const GamePage: React.FC<GamePageProps> = ({ onEnd }) => {
                     <EndDialog
                         moves={moves}
                         time={time}
-                        onNextLevel={() => window.location.reload()}
-                        onRestart={resetGame}
-                        onClose={() => setShowEndDialog(false)}
+                        onNextLevel={handleResults}
+                        onRestart={handleRestart}
+                        onClose={() => {
+                            setShowEndDialog(false);
+                            handleResults();
+                        }}
                     />
                 )}
             </div>
