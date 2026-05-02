@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import StartPage from './pages/StartPage';
 import GamePage from './pages/GamePage';
 import ResultsPage from './pages/ResultsPage';
-import CookieConsent from 'react-cookie-consent';
+import CookieModal from './components/CookieModal';
 
 const App: React.FC = () => {
     return (
@@ -15,16 +15,7 @@ const App: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 
-            <CookieConsent
-                location="bottom"
-                buttonText="Зрозуміло та приймаю"
-                cookieName="mazeRunnerGdprConsent"
-                style={{ background: "#2B373B", zIndex: 9999 }}
-                buttonStyle={{ background: "#f1d600", color: "#4e503b", fontSize: "14px", borderRadius: "4px", fontWeight: "bold" }}
-                expires={150}
-            >
-                Ця гра використовує файли cookie для збереження ваших налаштувань інтерфейсу та покращення користувацького досвіду згідно з політикою GDPR.
-            </CookieConsent>
+            <CookieModal />
         </>
     );
 };
