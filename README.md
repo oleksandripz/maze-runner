@@ -15,7 +15,7 @@
 ## Ліцензія
 Цей проєкт поширюється за умовами [MIT License](LICENSE.txt). 
 Детальний звіт щодо ліцензій залежностей знаходиться у файлі `license-report.txt`.
-Юридична інформація: [Privacy Policy](PPRIVACY_POLICY.md) та [EULA](EULA.md).
+Юридична інформація: [Privacy Policy](PRIVACY_POLICY.md) та [EULA](EULA.md).
 
 ## Автор
 **Студент:** Сушко Олександр Юрійович
